@@ -130,7 +130,10 @@
     <div class="result-container">
         {% if success %}
         <h1 class="success">&#10003; Payment Successful</h1>
-        <p>Your payment has been processed successfully.</p>
+        <p>&nbsp;</p>
+        <p>Please ignore the email from <strong>TP Payment Response (Admin) - <em>system@eecsoftware.com</em></strong>, it has the wrong details on it.</p>
+        <p>&nbsp;</p>
+        <p>For proof that the payment went through, please generate an internal PDF receipt below.</p>
 
         <!-- PDF download button — always visible on success -->
         <div class="action-buttons">
@@ -294,7 +297,7 @@ Best regards`;
                 // ── Logo ────────────────────────────────────────────────
                 try {
                     // SVG native ratio: 349.91 x 34  => aspect ~10.29
-                    const logoW = 110;
+                    const logoW = 60;
                     const logoH = Math.round(logoW / (349.91 / 34));   // ~11mm
                     const logoDataUrl = await loadSvgAsDataUrl('/static/RS_Red_Logo.svg', 1050, 102);
                     doc.addImage(logoDataUrl, 'PNG', margin, y, logoW, logoH);
@@ -312,7 +315,7 @@ Best regards`;
                 doc.setDrawColor(...brand);
                 doc.setLineWidth(0.6);
                 doc.line(margin, y, pageW - margin, y);
-                y += 7;
+                y += 10;
 
                 // ── Receipt title ────────────────────────────────────────
                 const authMethod  = (_txData.authmethod || '').toUpperCase();

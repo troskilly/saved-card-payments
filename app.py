@@ -380,6 +380,47 @@ def logs_api():
     else:
         return "Logs are not accessible except in debug mode"
         
+@app.route('/test_success')
+def test_success():
+    """Render the success result page with mock data — debug mode only"""
+    debug_enabled = os.getenv('FLASK_DEBUG', 'False').lower() in ('true', '1', 'yes', 'on')
+    if not debug_enabled:
+        return "Test routes are not accessible except in debug mode", 403
+
+    mock_response = {
+        "requestreference": "A1B2C3",
+        "version": "1.00",
+        "responses": [{
+            "accounttypedescription": "ECOM",
+            "acquirerresponsecode": "00",
+            "acquirerresponsemessage": "Approved or completed Successfully",
+            "authcode": "12345Z",
+            "authmethod": "PRE",
+            "baseamount": "12345",
+            "chargedescription": "Red Savannah",
+            "currencyiso3a": "USD",
+            "errorcode": "0",
+            "errormessage": "Ok",
+            "livestatus": "1",
+            "maskedpan": "123456######1234",
+            "merchantname": "Red Savannah",
+            "merchantcity": "Reading",
+            "merchantcountryiso2a": "GB",
+            "operatorname": "wsapi_redsavanna_12345",
+            "orderreference": "123a456b-12c-4f5g6-8hgs-649b99a3696f",
+            "paymenttypedescription": "MASTERCARD",
+            "requesttypedescription": "AUTH",
+            "settleduedate": "2026-03-12",
+            "settlestatus": "2",
+            "transactionreference": "55-70-123456789",
+            "transactionstartedtimestamp": "2026-03-12 17:39:42"
+        }]
+    }
+    return render_template('payment_result.html',
+                           success=True,
+                           response_data=mock_response,
+                           debug=debug_enabled)
+
 if __name__ == '__main__':
     DEBUG_MODE = os.getenv('FLASK_DEBUG', 'False').lower() in ('true', '1', 'yes', 'on')
     app.run(host='0.0.0.0', port=5000, debug=DEBUG_MODE)

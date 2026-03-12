@@ -208,7 +208,7 @@
     <div class="payment-container">
         <div class="header">
             <h1 id="pageTitle">Payment Confirmation</h1>
-            <p id="headerSubtitle">Please select a payment type to continue</p>
+            <p id="headerSubtitle">Use a tokenised card to take another payment</p>
         </div>
 
         {% if data %}
@@ -220,18 +220,20 @@
                 <button class="auth-btn" id="btn-saved-card" onclick="selectAuthMethod('FINAL')">
                     <span class="auth-btn-icon">💳</span>
                     <span class="auth-btn-title">Saved Card Payment</span>
-                    <span class="auth-btn-desc">Standard authorisation and immediate settlement</span>
+                    <span class="auth-btn-desc">Standard payment with immediate settlement</span>
                     <span class="auth-check">✓ Selected</span>
                 </button>
                 <button class="auth-btn" id="btn-pre-auth" onclick="selectAuthMethod('PRE')">
                     <span class="auth-btn-icon">🔒</span>
                     <span class="auth-btn-title">Pre-Authorisation</span>
-                    <span class="auth-btn-desc">Reserve funds without immediate settlement</span>
+                    <span class="auth-btn-desc">Block funds on the card for the next 30 days</span>
                     <span class="auth-check">✓ Selected</span>
                 </button>
             </div>
+            <p>&nbsp;</p>
+            <h2>If you are unsure, please speak to Tom.</h2>
         </div>
-
+        
         <!-- Payment content — hidden until auth method selected -->
         <div class="payment-content hidden" id="paymentContent">
             <div class="payment-details">
