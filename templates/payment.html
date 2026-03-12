@@ -25,6 +25,107 @@
             color: #333;
             margin-bottom: 30px;
         }
+        .header p {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        /* Auth method selection */
+        .auth-selection {
+            margin-bottom: 30px;
+        }
+        .auth-selection h2 {
+            text-align: center;
+            color: #495057;
+            margin-bottom: 16px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+        }
+        .auth-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+        .auth-btn {
+            flex: 1;
+            max-width: 300px;
+            padding: 20px 18px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            text-align: left;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .auth-btn:hover {
+            box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+        }
+        .auth-btn.selected-saved-card {
+            border-color: #007bff;
+            background: #e8f4ff;
+        }
+        .auth-btn.selected-pre-auth {
+            border-color: #fd7e14;
+            background: #fff4e8;
+        }
+        .auth-btn-icon {
+            font-size: 1.6em;
+            line-height: 1;
+        }
+        .auth-btn-title {
+            font-weight: bold;
+            font-size: 1em;
+            color: #333;
+            margin-top: 4px;
+        }
+        .auth-btn.selected-saved-card .auth-btn-title {
+            color: #0062cc;
+        }
+        .auth-btn.selected-pre-auth .auth-btn-title {
+            color: #d9650a;
+        }
+        .auth-btn-desc {
+            font-size: 0.78em;
+            color: #6c757d;
+            line-height: 1.3;
+        }
+        .auth-check {
+            display: none;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-top: 6px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            width: fit-content;
+        }
+        .auth-btn.selected-saved-card .auth-check {
+            display: block;
+            color: #0062cc;
+            background: rgba(0,123,255,0.12);
+        }
+        .auth-btn.selected-pre-auth .auth-check {
+            display: block;
+            color: #d9650a;
+            background: rgba(253,126,20,0.12);
+        }
+
+        /* Payment content area */
+        .payment-content {
+            animation: fadeIn 0.3s ease;
+        }
+        .payment-content.hidden {
+            display: none;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
         .payment-details {
             background: #f8f9fa;
             padding: 20px;
@@ -65,9 +166,18 @@
             font-size: 18px;
             cursor: pointer;
             transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        .submit-btn:hover {
+        .submit-btn:hover:not(:disabled) {
             background: #0056b3;
+        }
+        .submit-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.85;
         }
         .warning {
             background: #fff3cd;
@@ -77,117 +187,91 @@
             margin-bottom: 20px;
             border: 1px solid #ffeaa7;
         }
-        .advanced-section {
-            background: #e9ecef;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            border-left: 4px solid #6c757d;
+
+        /* Spinner inside submit button */
+        .btn-spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255,255,255,0.35);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+            flex-shrink: 0;
         }
-        .advanced-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-        }
-        .advanced-header h3 {
-            margin: 0;
-            color: #495057;
-        }
-        .expand-icon {
-            font-size: 1.2em;
-            transition: transform 0.3s;
-        }
-        .expand-icon.expanded {
-            transform: rotate(180deg);
-        }
-        .advanced-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-        .advanced-content.expanded {
-            max-height: 200px;
-            margin-top: 15px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            font-weight: bold;
-            color: #495057;
-            margin-bottom: 5px;
-        }
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            font-size: 16px;
-            background-color: white;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="payment-container">
         <div class="header">
-            <h1 id="pageTitle">Saved Card Payment Confirmation</h1>
-            <p>Please review the payment details below</p>
+            <h1 id="pageTitle">Payment Confirmation</h1>
+            <p id="headerSubtitle">Please select a payment type to continue</p>
         </div>
+
         {% if data %}
-        <!-- Advanced Section -->
-        <div class="advanced-section">
-            <div class="advanced-header" onclick="toggleAdvanced()">
-                <h3>Advanced Options</h3>
-                <span class="expand-icon" id="expandIcon">▼</span>
-            </div>
-            <div class="advanced-content" id="advancedContent">
-                <div class="form-group">
-                    <label for="authMethodSelect">Authorization Method:</label>
-                    <select id="authMethodSelect" onchange="updateAuthMethod()">
-                        <option value="FINAL" {% if data.get('authmethod') != 'PRE' %}selected{% endif %}>Normal</option>
-                        <option value="PRE" {% if data.get('authmethod') == 'PRE' %}selected{% endif %}>Pre-Auth</option>
-                    </select>
-                </div>
+
+        <!-- Auth method selection buttons -->
+        <div class="auth-selection">
+            <h2>Select Payment Type</h2>
+            <div class="auth-buttons">
+                <button class="auth-btn" id="btn-saved-card" onclick="selectAuthMethod('FINAL')">
+                    <span class="auth-btn-icon">💳</span>
+                    <span class="auth-btn-title">Saved Card Payment</span>
+                    <span class="auth-btn-desc">Standard authorisation and immediate settlement</span>
+                    <span class="auth-check">✓ Selected</span>
+                </button>
+                <button class="auth-btn" id="btn-pre-auth" onclick="selectAuthMethod('PRE')">
+                    <span class="auth-btn-icon">🔒</span>
+                    <span class="auth-btn-title">Pre-Authorisation</span>
+                    <span class="auth-btn-desc">Reserve funds without immediate settlement</span>
+                    <span class="auth-check">✓ Selected</span>
+                </button>
             </div>
         </div>
 
-        <div class="payment-details">
-            <h3>Payment Details</h3>
-            {% for key, value in data.items() %}
-            {% if debug or key in ['baseamount', 'currencyiso3a'] %}
-            <div class="detail-row" data-key="{{ key }}">
-                <span class="label">
-                    {% if key == 'baseamount' %}
-                        amount:
-                    {% elif key == 'currencyiso3a' %}
-                        currency:
-                    {% else %}
-                        {{ key.replace('_', ' ') }}:
-                    {% endif %}
-                </span>
-                <span class="value {% if key in ['currencyiso3a', 'baseamount'] %}highlight-green{% endif %}" id="value-{{ key }}">
-                    {% if key == 'baseamount' %}
-                        {{ value|add_commas }}
-                    {% else %}
-                        {{ value }}
-                    {% endif %}
-                </span>
+        <!-- Payment content — hidden until auth method selected -->
+        <div class="payment-content hidden" id="paymentContent">
+            <div class="payment-details">
+                <h3>Payment Details</h3>
+                {% for key, value in data.items() %}
+                {% if debug or key in ['baseamount', 'currencyiso3a'] %}
+                <div class="detail-row" data-key="{{ key }}">
+                    <span class="label">
+                        {% if key == 'baseamount' %}
+                            amount:
+                        {% elif key == 'currencyiso3a' %}
+                            currency:
+                        {% else %}
+                            {{ key.replace('_', ' ') }}:
+                        {% endif %}
+                    </span>
+                    <span class="value {% if key in ['currencyiso3a', 'baseamount'] %}highlight-green{% endif %}" id="value-{{ key }}">
+                        {% if key == 'baseamount' %}
+                            {{ value|add_commas }}
+                        {% else %}
+                            {{ value }}
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+                {% endfor %}
             </div>
-            {% endif %}
-            {% endfor %}
+
+            <div class="warning">
+                <strong>Important:</strong> Please verify all details are correct before proceeding with payment.
+            </div>
+
+            <form method="POST" action="/process_payment" id="paymentForm">
+                {% for key, value in data.items() %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}" id="input-{{ key }}">
+                {% endfor %}
+                <button type="submit" class="submit-btn" id="submitBtn">Process Payment</button>
+            </form>
         </div>
-        <div class="warning">
-            <strong>Important:</strong> Please verify all details are correct before proceeding with payment.
-        </div>
-        <form method="POST" action="/process_payment" id="paymentForm">
-            {% for key, value in data.items() %}
-            <input type="hidden" name="{{ key }}" value="{{ value }}" id="input-{{ key }}">
-            {% endfor %}
-            <button type="submit" class="submit-btn">Process Payment</button>
-        </form>
+
         {% else %}
         <p>No payment data provided.</p>
         {% endif %}
@@ -195,83 +279,90 @@
 
     <script>
         const debugMode = {{ 'true' if debug else 'false' }};
+        let isSubmitting = false;
 
-        function toggleAdvanced() {
-            const content = document.getElementById('advancedContent');
-            const icon = document.getElementById('expandIcon');
-            
-            content.classList.toggle('expanded');
-            icon.classList.toggle('expanded');
-        }
+        function selectAuthMethod(method) {
+            const btnSavedCard = document.getElementById('btn-saved-card');
+            const btnPreAuth   = document.getElementById('btn-pre-auth');
+            const pageTitle    = document.getElementById('pageTitle');
+            const subtitle     = document.getElementById('headerSubtitle');
+            const paymentContent = document.getElementById('paymentContent');
 
-        function updateAuthMethod() {
-            const select = document.getElementById('authMethodSelect');
-            const authMethod = select.value;
-            const pageTitle = document.getElementById('pageTitle');
-            
-            // Update the H1 title
-            if (authMethod === 'PRE') {
-                pageTitle.textContent = 'Saved Card Pre-Auth Confirmation';
-            } else {
+            // Reset both buttons
+            btnSavedCard.className = 'auth-btn';
+            btnPreAuth.className   = 'auth-btn';
+
+            if (method === 'FINAL') {
+                btnSavedCard.classList.add('selected-saved-card');
                 pageTitle.textContent = 'Saved Card Payment Confirmation';
-            }
-            
-            // Update authmethod hidden input
-            const authMethodInput = document.getElementById('input-authmethod');
-            if (authMethodInput) {
-                authMethodInput.value = authMethod;
             } else {
-                // Create the input if it doesn't exist
+                btnPreAuth.classList.add('selected-pre-auth');
+                pageTitle.textContent = 'Saved Card Pre-Auth Confirmation';
+            }
+
+            subtitle.textContent = 'Please review the payment details below';
+
+            // Set / update authmethod hidden input
+            let authInput = document.getElementById('input-authmethod');
+            if (authInput) {
+                authInput.value = method;
+            } else {
                 const form = document.getElementById('paymentForm');
-                const newInput = document.createElement('input');
-                newInput.type = 'hidden';
-                newInput.name = 'authmethod';
-                newInput.value = authMethod;
-                newInput.id = 'input-authmethod';
-                form.appendChild(newInput);
+                const inp  = document.createElement('input');
+                inp.type   = 'hidden';
+                inp.name   = 'authmethod';
+                inp.value  = method;
+                inp.id     = 'input-authmethod';
+                form.appendChild(inp);
             }
-            
-            // Update authmethod display value (if in debug mode)
-            if (debugMode) {
-                const authMethodValueSpan = document.getElementById('value-authmethod');
-                if (authMethodValueSpan) {
-                    authMethodValueSpan.textContent = authMethod;
-                }
-            }
-            
-            // Handle settlestatus for FINAL/Normal mode
-            if (authMethod === 'FINAL') {
-                // Set settlestatus to 1
-                const settleStatusInput = document.getElementById('input-settlestatus');
-                if (settleStatusInput) {
-                    settleStatusInput.value = '1';
+
+            // For FINAL mode, ensure settlestatus = 1
+            if (method === 'FINAL') {
+                let ssInput = document.getElementById('input-settlestatus');
+                if (ssInput) {
+                    ssInput.value = '1';
                 } else {
-                    // Create the input if it doesn't exist
                     const form = document.getElementById('paymentForm');
-                    const newInput = document.createElement('input');
-                    newInput.type = 'hidden';
-                    newInput.name = 'settlestatus';
-                    newInput.value = '1';
-                    newInput.id = 'input-settlestatus';
-                    form.appendChild(newInput);
+                    const inp  = document.createElement('input');
+                    inp.type   = 'hidden';
+                    inp.name   = 'settlestatus';
+                    inp.value  = '1';
+                    inp.id     = 'input-settlestatus';
+                    form.appendChild(inp);
                 }
-                
-                // Update settlestatus display value (if in debug mode)
-                if (debugMode) {
-                    const settleStatusValueSpan = document.getElementById('value-settlestatus');
-                    if (settleStatusValueSpan) {
-                        settleStatusValueSpan.textContent = '1';
-                    }
-                }
-            } else {
-                // For PRE mode, keep original settlestatus or remove it
-                // (You can modify this logic based on your requirements)
             }
+
+            // Update debug display values if visible
+            if (debugMode) {
+                const authSpan = document.getElementById('value-authmethod');
+                if (authSpan) authSpan.textContent = method;
+
+                if (method === 'FINAL') {
+                    const ssSpan = document.getElementById('value-settlestatus');
+                    if (ssSpan) ssSpan.textContent = '1';
+                }
+            }
+
+            // Reveal payment content (re-trigger animation each time)
+            paymentContent.classList.remove('hidden');
         }
 
-        // Initialize the page with correct title on load
-        window.addEventListener('DOMContentLoaded', function() {
-            updateAuthMethod();
+        // Form submit protection — prevent double submission
+        document.addEventListener('DOMContentLoaded', function () {
+            const form      = document.getElementById('paymentForm');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (form && submitBtn) {
+                form.addEventListener('submit', function (e) {
+                    if (isSubmitting) {
+                        e.preventDefault();
+                        return;
+                    }
+                    isSubmitting = true;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="btn-spinner"></span> Processing…';
+                });
+            }
         });
     </script>
 </body>
