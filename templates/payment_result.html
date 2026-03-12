@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+    <title>Payment Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .result-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .success {
+            color: #28a745;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .response-data {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: left;
+            position: relative;
+        }
+        .copy-btn {
+            background: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+        .copy-btn:hover {
+            background: #0056b3;
+        }
+        .copy-btn.copied {
+            background: #28a745;
+        }
+        .send-email-btn {
+            background: #dc3545;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .send-email-btn:hover {
+            background: #c82333;
+        }
+        .close-btn {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .close-btn:hover {
+            background: #545b62;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        {% if success %}
+        <h1 class="success">✓ Payment Successful</h1>
+        <p>Your payment has been processed successfully.</p>
+        
+		{% if debug %}
+        {% if response_data %}
+        <div class="response-data">
+            <h3>Transaction Details:</h3>
+            <pre id="json-data">{{ response_data | tojson(indent=2) }}</pre>
+            <button class="copy-btn" onclick="copyToClipboard('json-data', this)">Copy to Clipboard</button>
+        </div>
+        {% endif %}
+		{% endif %}
+        
+        {% else %}
+        <h1 class="error">✗ Payment Failed</h1>
+        <p>There was an error processing your payment.</p>
+        
+        {% if error %}
+        <div class="response-data">
+            <h3>Error Details:</h3>
+            <p>{{ error }}</p>
+			<pre id="error-json-data">{{ response_data | tojson(indent=2) }}</pre>
+            <button class="send-email-btn" onclick="sendErrorEmail('error-json-data')">Send Error Report</button>
+        </div>
+        {% endif %}
+        {% endif %}
+        
+    </div>
+
+    <script>
+        function copyToClipboard(elementId, button) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            // Use the modern Clipboard API if available
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showCopySuccess(button);
+                }).catch(err => {
+                    // Fallback if clipboard API fails
+                    fallbackCopy(text, button);
+                });
+            } else {
+                // Fallback for older browsers or non-secure contexts
+                fallbackCopy(text, button);
+            }
+        }
+
+        function fallbackCopy(text, button) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showCopySuccess(button);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                button.textContent = 'Copy Failed';
+                button.classList.add('error');
+                setTimeout(() => {
+                    button.textContent = 'Copy to Clipboard';
+                    button.classList.remove('error');
+                }, 2000);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function showCopySuccess(button) {
+            button.textContent = 'Copied!';
+            button.classList.add('copied');
+            setTimeout(() => {
+                button.textContent = 'Copy to Clipboard';
+                button.classList.remove('copied');
+            }, 2000);
+        }
+
+        function sendErrorEmail(elementId) {
+            const element = document.getElementById(elementId);
+            const jsonData = element.textContent;
+            
+            // Add your custom text here
+            const emailText = `Hi Team,
+
+A saved card payment has failed. Please review the error details below:
+
+${jsonData}
+
+Please investigate this issue at your earliest convenience.
+
+Best regards`;
+            
+            const emailBody = encodeURIComponent(emailText);
+            const subject = encodeURIComponent('Saved Card Payment Failure');
+            
+            const mailtoLink = `mailto:technology@redsavannah.com?cc=troskilly@redsavannah.com&subject=${subject}&body=${emailBody}`;
+            
+            window.location.href = mailtoLink;
+        }
+    </script>
+</body>
+</html>

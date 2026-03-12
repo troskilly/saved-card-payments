@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+    <title>Payment App Logs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .header {
+            background: #343a40;
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .nav-links {
+            margin-top: 0.5rem;
+        }
+        
+        .nav-links a {
+            color: #adb5bd;
+            text-decoration: none;
+            margin-right: 1rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+        
+        .nav-links a:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: 1fr auto auto auto auto;
+            gap: 1rem;
+            align-items: end;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #495057;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            padding: 0.5rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .logs-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .logs-header {
+            background: #f8f9fa;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logs-stats {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .log-entry {
+            border-bottom: 1px solid #f1f3f4;
+            padding: 1rem 1.5rem;
+            transition: background-color 0.2s;
+        }
+        
+        .log-entry:hover {
+            background: #f8f9fa;
+        }
+        
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .log-timestamp {
+            font-family: 'Courier New', monospace;
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        
+        .log-level {
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .log-level.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .log-level.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .log-level.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .log-message {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .log-json {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+        }
+        
+        .pagination button {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #ced4da;
+            background: white;
+            color: #495057;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background: #e9ecef;
+        }
+        
+        .pagination button:disabled {
+            background: #f8f9fa;
+            color: #adb5bd;
+            cursor: not-allowed;
+        }
+        
+        .pagination .current-page {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        
+        .no-logs {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .filters {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .log-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Payment App Logs</h1>
+        <div class="nav-links">
+            <a href="/payment">Payment Page</a>
+            <a href="https://portal.trustpayments.com/dashboard">Trust Portal</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="filters">
+            <div class="filter-group">
+                <label for="search">Search</label>
+                <input type="text" id="search" placeholder="Search logs...">
+            </div>
+            <div class="filter-group">
+                <label for="level">Log Level</label>
+                <select id="level">
+                    <option value="all">All Levels</option>
+                    <option value="info">Info</option>
+                    <option value="warning">Warning</option>
+                    <option value="error">Error</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="event_type">Event Type</label>
+                <select id="event_type">
+                    <option value="all">All Events</option>
+                    <option value="INCOMING_REQUEST">Incoming Requests</option>
+                    <option value="OUTGOING_RESPONSE">Outgoing Responses</option>
+                    <option value="API_RESPONSE_SUCCESS">API Success</option>
+                    <option value="API_RESPONSE_INVALID_JSON">API Errors</option>
+                    <option value="GENERAL">General</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="per_page">Per Page</label>
+                <select id="per_page">
+                    <option value="25">25</option>
+                    <option value="50" selected>50</option>
+                    <option value="100">100</option>
+                    <option value="200">200</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>&nbsp;</label>
+                <button class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+            </div>
+        </div>
+        
+        <div class="logs-container">
+            <div class="logs-header">
+                <h3>Application Logs</h3>
+                <div class="logs-stats" id="logs-stats">Loading...</div>
+            </div>
+            
+            <div id="logs-content">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>Loading logs...</div>
+                </div>
+            </div>
+            
+            <div class="pagination" id="pagination" style="display: none;">
+                <!-- Pagination will be inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentPage = 1;
+        let isLoading = false;
+        
+        // Debounce function for search
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // Load logs with current filters
+        async function loadLogs(page = 1) {
+            if (isLoading) return;
+            isLoading = true;
+            
+            const search = document.getElementById('search').value;
+            const level = document.getElementById('level').value;
+            const eventType = document.getElementById('event_type').value;
+            const perPage = document.getElementById('per_page').value;
+            
+            const params = new URLSearchParams({
+                search,
+                level,
+                event_type: eventType,
+                per_page: perPage,
+                page
+            });
+            
+            try {
+                const response = await fetch(`/api/logs?${params}`);
+                const data = await response.json();
+                
+                displayLogs(data.logs);
+                displayPagination(data.pagination);
+                updateStats(data.pagination);
+                currentPage = page;
+                
+            } catch (error) {
+                document.getElementById('logs-content').innerHTML = `
+                    <div class="no-logs">
+                        <h3>Error loading logs</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                isLoading = false;
+            }
+        }
+        
+        // Display logs in the UI
+        function displayLogs(logs) {
+            const container = document.getElementById('logs-content');
+            
+            if (logs.length === 0) {
+                container.innerHTML = `
+                    <div class="no-logs">
+                        <h3>No logs found</h3>
+                        <p>Try adjusting your filters or search terms.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const logsHtml = logs.map(log => {
+                const jsonContent = log.json_content ? 
+                    `<div class="log-json">${JSON.stringify(log.json_content, null, 2)}</div>` : '';
+                
+                return `
+                    <div class="log-entry">
+                        <div class="log-header">
+                            <span class="log-timestamp">${log.timestamp}</span>
+                            <span class="log-level ${log.level.toLowerCase()}">${log.level}</span>
+                        </div>
+                        <div class="log-message">${escapeHtml(log.message)}</div>
+                        ${jsonContent}
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = logsHtml;
+        }
+        
+        // Display pagination controls
+        function displayPagination(pagination) {
+            const container = document.getElementById('pagination');
+            
+            if (pagination.total_pages <= 1) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'flex';
+            
+            let paginationHtml = `
+                <button onclick="loadLogs(1)" ${!pagination.has_prev ? 'disabled' : ''}>First</button>
+                <button onclick="loadLogs(${pagination.current_page - 1})" ${!pagination.has_prev ? 'disabled' : ''}>Previous</button>
+            `;
+            
+            // Show page numbers around current page
+            const start = Math.max(1, pagination.current_page - 2);
+            const end = Math.min(pagination.total_pages, pagination.current_page + 2);
+            
+            for (let i = start; i <= end; i++) {
+                const isCurrentPage = i === pagination.current_page;
+                paginationHtml += `
+                    <button onclick="loadLogs(${i})" ${isCurrentPage ? 'class="current-page"' : ''}>${i}</button>
+                `;
+            }
+            
+            paginationHtml += `
+                <button onclick="loadLogs(${pagination.current_page + 1})" ${!pagination.has_next ? 'disabled' : ''}>Next</button>
+                <button onclick="loadLogs(${pagination.total_pages})" ${!pagination.has_next ? 'disabled' : ''}>Last</button>
+            `;
+            
+            container.innerHTML = paginationHtml;
+        }
+        
+        // Update stats display
+        function updateStats(pagination) {
+            const stats = document.getElementById('logs-stats');
+            const start = (pagination.current_page - 1) * pagination.per_page + 1;
+            const end = Math.min(start + pagination.per_page - 1, pagination.total_logs);
+            
+            stats.textContent = `Showing ${start}-${end} of ${pagination.total_logs} logs`;
+        }
+        
+        // Clear all filters
+        function clearFilters() {
+            document.getElementById('search').value = '';
+            document.getElementById('level').value = 'all';
+            document.getElementById('event_type').value = 'all';
+            document.getElementById('per_page').value = '50';
+            loadLogs(1);
+        }
+        
+        // Escape HTML to prevent XSS
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+        
+        // Set up event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Search with debounce
+            const searchInput = document.getElementById('search');
+            searchInput.addEventListener('input', debounce(() => loadLogs(1), 500));
+            
+            // Filter changes
+            document.getElementById('level').addEventListener('change', () => loadLogs(1));
+            document.getElementById('event_type').addEventListener('change', () => loadLogs(1));
+            document.getElementById('per_page').addEventListener('change', () => loadLogs(1));
+            
+            // Initial load
+            loadLogs(1);
+            
+            // Auto-refresh every 30 seconds
+            setInterval(() => {
+                if (currentPage === 1) {
+                    loadLogs(1);
+                }
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
