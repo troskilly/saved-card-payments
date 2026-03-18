@@ -96,7 +96,7 @@ def add_commas(value):
 def log_request_info():
     """Log all incoming requests (except logs page to avoid recursive logging)"""
     # Skip logging for the logs page to prevent recursive logging
-    if request.endpoint in ['logs', 'logs_api']:
+    if request.endpoint in ['logs', 'logs_api', 'health']:
         return
         
     client_ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
@@ -121,7 +121,7 @@ def log_request_info():
 def log_response_info(response):
     """Log all outgoing responses (except logs page to avoid recursive logging)"""
     # Skip logging for the logs page to prevent recursive logging
-    if request.endpoint in ['logs', 'logs_api']:
+    if request.endpoint in ['logs', 'logs_api', 'health']:
         return response
         
     log_data = {
@@ -421,6 +421,17 @@ def test_success():
                            response_data=mock_response,
                            debug=debug_enabled)
 
+@app.route("/health")
+def health():
+    """Health endpoint for the Raspberry Pi Pico monitor."""
+    authenticated = bool(ST_USERNAME and ST_PASSWORD)
+    return jsonify({
+        "status": "healthy",
+        "authenticated": authenticated,
+        "service": "trust-payment",
+        "updated_at": datetime.now().isoformat(),
+    })
+    
 if __name__ == '__main__':
     DEBUG_MODE = os.getenv('FLASK_DEBUG', 'False').lower() in ('true', '1', 'yes', 'on')
     app.run(host='0.0.0.0', port=5000, debug=DEBUG_MODE)
