@@ -111,7 +111,7 @@ def log_request_info():
         'endpoint': request.endpoint,
         'user_agent': user_agent,
         'query_params': dict(request.args),
-        'form_data': dict(request.form) if request.form else None,
+        'form_data': dict(request.form) if request.form else (dict(request.args) if request.args else None),
         'content_length': request.content_length
     }
     

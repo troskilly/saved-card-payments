@@ -318,7 +318,7 @@
                 form.appendChild(inp);
             }
 
-            // For FINAL mode, ensure settlestatus = 1
+            // settlestatus: FINAL = 1 (immediate settlement), PRE = 2 (pre-auth)
             if (method === 'FINAL') {
                 let ssInput = document.getElementById('input-settlestatus');
                 if (ssInput) {
@@ -332,6 +332,19 @@
                     inp.id     = 'input-settlestatus';
                     form.appendChild(inp);
                 }
+            } else if (method === 'PRE') {
+                let ssInput = document.getElementById('input-settlestatus');
+                if (ssInput) {
+                    ssInput.value = '2';
+                } else {
+                    const form = document.getElementById('paymentForm');
+                    const inp  = document.createElement('input');
+                    inp.type   = 'hidden';
+                    inp.name   = 'settlestatus';
+                    inp.value  = '2';
+                    inp.id     = 'input-settlestatus';
+                    form.appendChild(inp);
+                }
             }
 
             // Update debug display values if visible
@@ -342,6 +355,9 @@
                 if (method === 'FINAL') {
                     const ssSpan = document.getElementById('value-settlestatus');
                     if (ssSpan) ssSpan.textContent = '1';
+                } else if (method === 'PRE') {
+                    const ssSpan = document.getElementById('value-settlestatus');
+                    if (ssSpan) ssSpan.textContent = '2';
                 }
             }
 
