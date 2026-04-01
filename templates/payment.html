@@ -347,6 +347,10 @@
                 }
             }
 
+            // Log actual input values to console for verification
+            console.log('[payment] authmethod =', document.getElementById('input-authmethod')?.value);
+            console.log('[payment] settlestatus =', document.getElementById('input-settlestatus')?.value);
+
             // Update debug display values if visible
             if (debugMode) {
                 const authSpan = document.getElementById('value-authmethod');
