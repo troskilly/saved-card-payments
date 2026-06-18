@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  flask-payment-app-test:
+    build: .
+    ports:
+      - "5003:5000"
+    env_file:
+      - .env.test
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=True
+      - TZ=Europe/London
+      - ST_USERNAME=${ST_USERNAME}
+      - ST_PASSWORD=${ST_PASSWORD}
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY:-test-secret-key-not-for-production}
+    volumes:
+      - ./logs:/app/logs
+    restart: "no"
+    container_name: payment-app-test
