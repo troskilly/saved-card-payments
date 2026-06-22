@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, redirect, flash, jsonify
-import securetrading
+from trust_client import call_trust_api
 import json
 import logging
 from datetime import datetime
@@ -19,13 +19,6 @@ ST_PASSWORD = os.getenv('ST_PASSWORD')
 # Validate that required environment variables are set
 if not ST_USERNAME or not ST_PASSWORD:
     raise ValueError("ST_USERNAME and ST_PASSWORD environment variables must be set in .env")
-
-def get_securetrading_client():
-    """Initialize and return Trust client"""
-    stconfig = securetrading.Config()
-    stconfig.username = ST_USERNAME
-    stconfig.password = ST_PASSWORD
-    return securetrading.Api(stconfig)
 
 # Configure logging
 log_dir = 'logs'
@@ -155,43 +148,30 @@ def process_payment():
         # Get the form data (which should match the original query params)
         form_data = request.form.to_dict()
         
-        # Initialize Trust client
-        st_client = get_securetrading_client()
-        
         # Prepare the request payload - map form fields to Trust expected fields
         request_data = {
             "requesttypedescriptions": request.form.getlist('requesttype'),
             "baseamount": str(int(float(form_data.get('baseamount', 0)) * 100)),
             "customerfirstname": form_data.get('darwinpaymentid')
         }
-        
+
         # Add any additional form fields that weren't explicitly mapped
         for field_name, field_value in form_data.items():
             if field_name not in request_data and field_value:
-                # Handle multi-value fields (like checkboxes or multiple selects)
                 if field_name in request.form and len(request.form.getlist(field_name)) > 1:
                     request_data[field_name] = request.form.getlist(field_name)
                 else:
                     request_data[field_name] = field_value
-                
-                app.logger.debug(f"Including additional field: {field_name} = {field_value}")
-        
+
         # Remove any None values to clean up the payload
         request_data = {k: v for k, v in request_data.items() if v is not None and v != ''}
-        
-        # Create Trust request
-        strequest = securetrading.Request()
-        strequest.update(request_data)
-        
+
         app.logger.debug(f"Preparing Payment Request with data: {json.dumps(request_data, indent=2)}")
-        
+
         # Process the payment
-        stresponse = st_client.process(strequest)
-        
-        app.logger.info(f"Payment Request Response: {json.dumps(stresponse, indent=2)}")
-        
-        # Convert response to dictionary for easier handling
-        response_dict = dict(stresponse)
+        response_dict = call_trust_api(request_data, ST_USERNAME, ST_PASSWORD)
+
+        app.logger.info(f"Payment Request Response: {json.dumps(response_dict, indent=2)}")
         
         # Log the API response details
         api_response_log = {

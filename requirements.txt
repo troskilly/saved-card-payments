@@ -1,4 +1,2 @@
 Flask==3.0.0
 Werkzeug==3.0.1
-securetrading==1.0.25
-six==1.17.0
