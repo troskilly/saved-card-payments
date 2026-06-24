@@ -187,6 +187,16 @@
             margin-bottom: 20px;
             border: 1px solid #ffeaa7;
         }
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 2px solid #f5c2c7;
+            font-size: 1.1em;
+            text-align: center;
+        }
 
         /* Spinner inside submit button */
         .btn-spinner {
@@ -212,6 +222,16 @@
         </div>
 
         {% if data %}
+        {% set _token = data.get('parenttransactionreference') %}
+        {% if not _token or _token == 'undefined' %}
+
+        <!-- No token / parent transaction reference — payment cannot proceed -->
+        <div class="alert-danger">
+            <strong>No Token detected.</strong><br>
+            Please return to Darwin, refresh the page and use the payment link again.
+        </div>
+
+        {% else %}
 
         <!-- Auth method selection buttons -->
         <div class="auth-selection">
@@ -273,6 +293,8 @@
                 <button type="submit" class="submit-btn" id="submitBtn">Process Payment</button>
             </form>
         </div>
+
+        {% endif %}
 
         {% else %}
         <p>No payment data provided.</p>

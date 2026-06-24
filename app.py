@@ -172,22 +172,32 @@ def process_payment():
         response_dict = call_trust_api(request_data, ST_USERNAME, ST_PASSWORD)
 
         app.logger.info(f"Payment Request Response: {json.dumps(response_dict, indent=2)}")
-        
-        # Log the API response details
-        api_response_log = {
-            'event': 'TRUST_PAYMENT_RESPONSE',
-            'timestamp': datetime.now().isoformat(),
-            'request_data': request_data,
-            'response_data': response_dict
-        }
-        
-        app.logger.info(f"TRUST_PAYMENT_RESPONSE: {json.dumps(api_response_log, indent=2)}")
-        
+
         # Check if the payment was successful
         # Trust typically returns errorcode "0" for success
         responses = response_dict.get('responses', [])
         error_code = responses[0].get('errorcode', '1')
         error_message = responses[0].get('errormessage', 'Unknown error')
+        error_data = responses[0].get('errordata', [])
+
+        # Known-error guidance shown to the user (and logged) for specific
+        # Trust validation failures we recognise.
+        user_note = None
+        if error_message == 'Invalid field' and 'credentialsonfile' in error_data:
+            user_note = ("The Token is not valid. If this is the second time you are "
+                         "using the Token, this is a known error, the original Token was "
+                         "overwritten. Please speak to Tom, to process this manually.")
+
+        # Log the API response details (with any user guidance note alongside the JSON)
+        api_response_log = {
+            'event': 'TRUST_PAYMENT_RESPONSE',
+            'timestamp': datetime.now().isoformat(),
+            'request_data': request_data,
+            'response_data': response_dict,
+            'user_note': user_note
+        }
+
+        app.logger.info(f"TRUST_PAYMENT_RESPONSE: {json.dumps(api_response_log, indent=2)}")
 
         if error_code == '0' or error_code == 0:
             flash('Payment processed successfully!', 'success')
@@ -200,9 +210,12 @@ def process_payment():
             error_msg = f'Payment failed: {error_message}'
             flash(error_msg, 'error')
             app.logger.error(f"Payment failed with error code {error_code}: {error_message}")
-            return render_template('payment_result.html', 
-                                 success=False, 
+            if user_note:
+                app.logger.error(f"USER_GUIDANCE_NOTE: {user_note}")
+            return render_template('payment_result.html',
+                                 success=False,
                                  error=error_msg,
+                                 note=user_note,
                                  response_data=response_dict,
                                  debug=app.debug)
             

@@ -27,6 +27,16 @@
         .error {
             color: #dc3545;
         }
+        .known-error-note {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 2px solid #f5c2c7;
+            font-size: 1.1em;
+            text-align: left;
+        }
         .response-data {
             background: #f8f9fa;
             padding: 20px;
@@ -158,6 +168,13 @@
         {% else %}
         <h1 class="error">&#10007; Payment Failed</h1>
         <p>There was an error processing your payment.</p>
+
+        {% if note %}
+        <div class="known-error-note">
+            <strong>&#9888; The Token is not valid.</strong><br>
+            {{ note }}
+        </div>
+        {% endif %}
 
         {% if error %}
         <div class="response-data">
